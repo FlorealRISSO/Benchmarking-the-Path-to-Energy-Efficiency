@@ -1,0 +1,32 @@
+[
+  {
+    "arguments": [
+      "/usr/lib64/ccache/gcc",
+      "-c",
+      "-O3",
+      "-march=native",
+      "-mavx",
+      "-o",
+      "julia",
+      "julia.c"
+    ],
+    "directory": "/home/floreal/Workspace/nrj/src",
+    "file": "/home/floreal/Workspace/nrj/src/julia.c",
+    "output": "/home/floreal/Workspace/nrj/src/julia"
+  },
+  {
+    "arguments": [
+      "/usr/lib64/ccache/gcc",
+      "-c",
+      "-O3",
+      "-march=native",
+      "-mavx",
+      "-o",
+      "julia256",
+      "julia256.c"
+    ],
+    "directory": "/home/floreal/Workspace/nrj/src",
+    "file": "/home/floreal/Workspace/nrj/src/julia256.c",
+    "output": "/home/floreal/Workspace/nrj/src/julia256"
+  }
+]
