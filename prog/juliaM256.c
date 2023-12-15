@@ -1,12 +1,12 @@
-#include <emmintrin.h>
 #include <fcntl.h>
-#include <immintrin.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <emmintrin.h>
+#include <immintrin.h>
 
 #include "cons.h"
 
@@ -38,7 +38,6 @@ int main() {
     close(fd);
     exit(EXIT_FAILURE);
   }
-
   memcpy(pixels, PPM_HEAD, PPM_SIZE);
 
   calculateJuliaSet(pixels + PPM_SIZE);
@@ -57,81 +56,99 @@ int main() {
 }
 
 INLINE void calculateJuliaSet(uint8_t *pixels) {
-  __m256d winx =
-      _mm256_set_pd(XMIN, XMIN + step_x, XMIN + 2 * step_x, XMIN + 3 * step_x);
-  __m256d winy =
-      _mm256_set_pd(YMAX, YMAX - step_y, YMAX - 2 * step_y, YMAX - step_y * 3);
-  __m128i wini = _mm_setr_epi32(4, 4, 4, 4);
+  // Constants
+  const __m256d xmin = _mm256_set1_pd(XMIN);
+  const __m256d ymax = _mm256_set1_pd(YMAX);
+  const __m256d xstep = _mm256_set1_pd(XSTEP);
+  const __m256d ystep = _mm256_set1_pd(YSTEP);
+  const __m256d max_iter = _mm256_set1_pd(MAXITER);
+  const __m256d threshold = _mm256_set1_pd(4.0);
+  const __m256d one = _mm256_set1_pd(1.0);
+  const __m256d a = _mm256_set1_pd(A);
+  const __m256d b = _mm256_set1_pd(B);
 
-  int idx = 3;
-  for (int k = 0; k < SIZE; k += 3) {
-    if (idx != 3) {
-      int col = idx % COL;
-      int line = idx / LINE;
 
-      double x = XMIN + col * step_x;
-      double y = YMAX - line * step_y;
-      winx[0] = winx[1];
-      winx[1] = winx[2];
-      winx[2] = winx[3];
-      winx[AVXD - 1] = x;
+  int ti = 0;
+  for (int i = 0; i < SIZE; i += (4 * COLORS)) {
+    int col = ti % COL;
+    int line = ti / LINE;
+    ti += 4;
 
-      winy[0] = winy[1];
-      winy[1] = winy[2];
-      winy[2] = winy[3];
-      winy[AVXD - 1] = y;
+    // XMIN + col * step_x
+    __m256d x = _mm256_set_pd(
+      col + 3,
+      col + 2,
+      col + 1,
+      col + 0
+    );
+    x = _mm256_mul_pd(x, xstep);
+    x = _mm256_add_pd(x, xmin);
 
-      wini[0] = wini[1];
-      wini[1] = wini[2];
-      wini[2] = wini[3];
-      wini[AVXD - 1] = 2;
+    // YMIN - line * step_y
+    __m256d y = _mm256_set_pd(
+      line,
+      line,
+      line,
+      line
+    );
+    y = _mm256_mul_pd(y, ystep);
+    y = _mm256_sub_pd(ymax, y);
+
+    __m256d zx = x;
+    __m256d zy = y;
+
+    __m256d iter = _mm256_set1_pd(2);
+
+    __m256d mask = _mm256_set1_pd(NAN);
+    for (int j = 2; j <= MAXITER; j++) {
+
+      /* LOOP CONDITION */
+      __m256d x2 = _mm256_mul_pd(zx, zx);
+      __m256d y2 = _mm256_mul_pd(zy, zy);
+      // Check if |x2 + y2| < 4.0
+      __m256d sum = _mm256_add_pd(x2, y2);
+      __m256d zmask = _mm256_cmp_pd(sum,
+                                    threshold, _CMP_LE_OQ);
+
+      mask = _mm256_and_pd(mask, zmask);
+
+      // Check if all pixels have converged
+      if (_mm256_testz_pd(mask, _mm256_set1_pd(NAN))) {
+        break;
+      }
+      /* END LOOP CONDITION */
+
+      /* LOOP BODY */
+      // Update iteration count
+      __m256d incr = _mm256_and_pd(mask, one);
+      iter = _mm256_add_pd(iter, incr);
+
+      // y = 2 * x * y + b
+      zy = _mm256_mul_pd(zx, zy);
+      zy = _mm256_mul_pd(zy, _mm256_set1_pd(2.0));
+      zy = _mm256_add_pd(zy, b);
+
+      // x = x * x - y * y + a
+      zx = _mm256_sub_pd(x2, y2);
+      zx = _mm256_add_pd(zx, a);
+      /* END LOOP BODY */
     }
-    idx += 1;
 
-    // int i = wini[0];
-    int i = 2;
-    double x = winx[0];
-    double y = winy[0];
-    int new_i = 0;
-    // printf("i: %d, x: %f, y: %f\n", i, x, y);
-    while (i <= iterationmax && (x * x + y * y) <= 4) {
-      // load
-      __m256d x256 = winx;
-      __m256d y256 = winy;
 
-      // calculate y = (((x * y) * 2) + B);
-      __m256d r1 = _mm256_mul_pd(x256, y256);
-      __m256d r2 = _mm256_set1_pd(2.0);
-      __m256d r3 = _mm256_mul_pd(r1, r2);
-      __m256d b = _mm256_set1_pd(B);
-      winy = _mm256_add_pd(r3, b);
-
-      // calculate x
-      __m256d x2 = _mm256_mul_pd(x256, x256);
-      __m256d y2 = _mm256_mul_pd(y256, y256);
-
-      __m256d r6 = _mm256_sub_pd(x2, y2);
-      __m256d a = _mm256_set1_pd(A);
-      __m256d r7 = _mm256_add_pd(r6, a);
-
-      winx = r7;
-      x = winx[0];
-      y = winy[0];
-      i++;
-      new_i++;
-    }
-    // __m128i ri = _mm_setr_epi32(new_i, new_i, new_i, new_i);
-    // wini = _mm_add_epi32(wini, ri);
-
-    if (i > iterationmax && (x * x + y * y) <= 4) {
-      pixels[k + 0] = 0;
-      pixels[k + 1] = 0;
-      pixels[k + 2] = 0;
-    } else {
-
-      pixels[k + 0] = (4 * i) % 256;
-      pixels[k + 1] = 2 * i;
-      pixels[k + 2] = (6 * i) % 256;
+    __m128i _iter = _mm256_cvtpd_epi32(iter);
+    int *tidx = (int*) &_iter;
+    for (int j = 0; j < 4; j++) {
+      int idx = tidx[j];
+      int k = j * 3;
+      if (idx > MAXITER) {
+        pixels[i + k + 0] = 0;
+        pixels[i + k + 1] = 0;
+        pixels[i + k + 2] = 0;
+      } else {
+        pixels[i + k + 0] = (4 * idx) % 256;
+        pixels[i + k + 1] = 2 * idx;
+        pixels[i + k + 2] = (6 * idx) % 256;
+      }
     }
   }
 }

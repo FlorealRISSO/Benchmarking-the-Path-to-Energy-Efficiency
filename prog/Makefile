@@ -7,6 +7,7 @@ all:
 	$(CC) $(CFLAGS) juliaM256.c -o build/juliaM256
 	$(CC) $(CFLAGS) juliaRow.c -o build/juliaRow
 	$(CC) $(CFLAGS) juliaMap.c -o build/juliaMap
+	$(CC) $(CFLAGS) juliaTest.c -o build/juliaTest
 
 
 clean:

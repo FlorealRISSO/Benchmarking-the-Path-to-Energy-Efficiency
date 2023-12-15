@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-taille = 200
+taille = 400
 xmin, xmax = -1, 1
 ymin, ymax = -1, 1
 iterationmax = 100
@@ -34,5 +34,5 @@ with open('julia.ppm', 'w') as f:
             f.write(str(pixels[col,line,0])+' '+str(pixels[col,line,1])+' '+str(pixels[col,line,2])+' ')
         f.write('\n')
 
-#plt.imshow(pixels)
-#plt.show(block=True) 
+plt.imshow(pixels)
+plt.show(block=True) 

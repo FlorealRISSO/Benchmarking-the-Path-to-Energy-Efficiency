@@ -54,37 +54,35 @@ int main() {
 }
 
 INLINE void calculateJuliaSet(uint8_t *pixels) {
-  double a = A;
-  double b = B;
-
-  // Precalculate constants outside the loop
-  double step_x = (XMAX - XMIN) / LINE;
-  double step_y = (YMAX - YMIN) / COL;
   int idx = 0;
 
   for (int k = 0; k < SIZE; k += 3) {
-    int i = 2;
-
     int col = idx % COL;
     int line = idx / LINE;
 
-    double x = XMIN + col * step_x;
-    double y = YMAX - line * step_y;
+    double x = XMIN + col * XSTEP;
+    double y = YMAX - line * YSTEP;
 
-    while (i <= iterationmax && (x * x + y * y) <= 4) {
-      double x_temp = x * x - y * y + a;
-      y = 2 * x * y + b;
-      x = x_temp;
+    int i = 2;
+    while (i <= MAXITER) {
+      double x2 = x * x;
+      double y2 = y * y;
+
+      if ((x2 + y2) > 4.0) {
+        break;
+      }
+
+      y = 2.0 * x * y + B;
+      x = x2 - y2 + A;
 
       i++;
     }
 
-    if (i > iterationmax && (x * x + y * y) <= 4) {
+    if (i > MAXITER) {
       pixels[k + 0] = 0;
       pixels[k + 1] = 0;
       pixels[k + 2] = 0;
     } else {
-
       pixels[k + 0] = (4 * i) % 256;
       pixels[k + 1] = 2 * i;
       pixels[k + 2] = (6 * i) % 256;
