@@ -39,7 +39,7 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
-  memcpy(pixels, "P6\n1000 1000\n255\n", PPM_SIZE);
+  memcpy(pixels, PPM_HEAD, PPM_SIZE);
 
   calculateJuliaSet(pixels + PPM_SIZE);
 
