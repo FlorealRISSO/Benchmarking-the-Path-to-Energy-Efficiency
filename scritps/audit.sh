@@ -21,8 +21,8 @@ kill $pid
 awk '
 	NR==2 {prev_timestamp = $1}  
 	NR>1 {
-		core += $3
-		ram += $4
+		core += $2
+		ram += $3
 	}	
 	END {
 		jcore = core / 1000000
