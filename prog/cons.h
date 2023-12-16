@@ -3,8 +3,8 @@
 #define _STRINGIZE(x) #x
 #define STRINGIZE(x) _STRINGIZE(x)
 
-#define LINE 10000
-#define COL 10000
+#define LINE 10000UL
+#define COL 10000UL
 #define PPM_HEAD "P6\n" STRINGIZE(LINE) " " STRINGIZE(COL) "\n255\n"
 #define COLORS 3
 #define SIZE (LINE * COL * COLORS)

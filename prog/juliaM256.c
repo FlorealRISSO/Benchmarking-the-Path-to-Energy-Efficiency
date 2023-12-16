@@ -139,7 +139,6 @@ INLINE void calculateJuliaSet(uint8_t *pixels) {
     int *tidx = (int*) &_iter;
     for (int j = 0; j < 4; j++) {
       int idx = tidx[j];
-      printf("%d\n", idx);
       int k = j * 3;
       if (idx > MAXITER) {
         pixels[i + k + 0] = 0;
@@ -151,6 +150,5 @@ INLINE void calculateJuliaSet(uint8_t *pixels) {
         pixels[i + k + 2] = (6 * idx) % 256;
       }
     }
-    puts("===");
   }
 }

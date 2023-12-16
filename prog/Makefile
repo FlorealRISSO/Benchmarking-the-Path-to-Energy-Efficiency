@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-O3 -march=native -mavx -fno-stack-protector -Wno-attributes
 
 all:
-	$(CC) $(CFLAGS) julia.c -o build/julia
+	## $(CC) $(CFLAGS) julia.c -o build/julia
 	$(CC) $(CFLAGS) juliaM256.c -o build/juliaM256
 	$(CC) $(CFLAGS) juliaM256f.c -o build/juliaM256f
 	$(CC) $(CFLAGS) -fopenmp juliaM256f.c -o build/juliaM256f

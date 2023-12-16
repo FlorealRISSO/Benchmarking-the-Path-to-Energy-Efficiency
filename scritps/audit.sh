@@ -20,16 +20,21 @@ kill $pid
 
 awk '
 	NR==2 {prev_timestamp = $1}  
-	NR>1 {sum += $3} 
+	NR>1 {
+		core += $3
+		ram += $4
+	}	
 	END {
-		joule = sum / 1000
+		jcore = core / 1000000
+		jram = ram / 1000000
+		jtotal = jcore + jram
 		if (NR == 2) {
-			print "?", joule, "?"
+			print "?", jtotal, jcore, jram, "?"
 			exit 
 		}
 		time = $1 - prev_timestamp
-		watt = joule / time
-		print time, joule, watt
+		watt = jtotal / time
+		print time, jtotal, jcore, jram, watt
 	}
 ' $log
 
