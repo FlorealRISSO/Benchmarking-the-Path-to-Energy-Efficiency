@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-O3 -march=native -mavx -fno-stack-protector
+CFLAGS=-O3 -march=native -mavx -fno-stack-protector -Wno-attributes
 
 all:
 	$(CC) $(CFLAGS) julia.c -o build/julia

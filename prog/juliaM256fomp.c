@@ -69,7 +69,7 @@ INLINE void calculateJuliaSet(uint8_t *pixels) {
   const __m256 b = _mm256_set1_ps(B);
 
 
-  omp_set_num_threads(8);
+  omp_set_num_threads(36);
   #pragma omp parallel for
   for (int i = 0; i < SIZE; i += (8 * COLORS)) {
     int ti = i / COLORS;

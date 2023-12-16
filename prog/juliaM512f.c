@@ -64,6 +64,7 @@ INLINE void calculateJuliaSet(uint8_t *pixels) {
   const __m512 max_iter = _mm512_set1_ps(MAXITER);
   const __m512 threshold = _mm512_set1_ps(4.0);
   const __m512i one = _mm512_set1_epi32(1);
+  const __m512i zero = _mm512_set1_epi32(0);
   const __m512 a = _mm512_set1_ps(A);
   const __m512 b = _mm512_set1_ps(B);
 
@@ -122,7 +123,7 @@ INLINE void calculateJuliaSet(uint8_t *pixels) {
     __m512 zy = y;
 
     __m512i iter = _mm512_set1_epi32(2);
-    __mmask16 mask = _mm512_int2mask(0xFF);
+    __mmask16 mask = _mm512_int2mask(0xFFFFFFFF);
 
     for (int j = 2; j <= MAXITER; j++) {
 
@@ -130,21 +131,25 @@ INLINE void calculateJuliaSet(uint8_t *pixels) {
       __m512 x2 = _mm512_mul_ps(zx, zx);
       __m512 y2 = _mm512_mul_ps(zy, zy);
       // Check if |x2 + y2| < 4.0
+
       __m512 sum = _mm512_add_ps(x2, y2);
       __mmask16 zmask = _mm512_cmp_ps_mask(sum,
-                                    threshold, _CMP_LE_OQ);
+                                           threshold, _CMP_LE_OQ);
 
       mask = _mm512_kand(mask, zmask);
 
+
       // Check if all pixels have converged
-      if (mask) {
+
+      if (_kortestz_mask16_u8(mask, mask)) {
         break;
       }
       /* END LOOP CONDITION */
 
       /* LOOP BODY */
       // Upsate iteration count
-      _mm512_mask_add_epi32(iter, mask, iter, one);
+      __m512i _iter = _mm512_maskz_add_epi32(mask, zero, one);
+      iter = _mm512_add_epi32(_iter, iter);
 
 
       // y = 2 * x * y + b
@@ -159,18 +164,20 @@ INLINE void calculateJuliaSet(uint8_t *pixels) {
     }
 
 
-    int *tidx = (int*) &iter;
+    int tidx[16];
+    _mm512_storeu_si512((__m512i*)tidx, iter);
     for (int j = 0; j < 16; j++) {
       int idx = tidx[j];
       int k = j * 3;
+      
       if (idx > MAXITER) {
         pixels[i + k + 0] = 0;
         pixels[i + k + 1] = 0;
         pixels[i + k + 2] = 0;
       } else {
-        pixels[i + k + 0] = (4 * idx) % 512;
+        pixels[i + k + 0] = (4 * idx) % 256;
         pixels[i + k + 1] = 2 * idx;
-        pixels[i + k + 2] = (6 * idx) % 512;
+        pixels[i + k + 2] = (6 * idx) % 256;
       }
     }
   }
