@@ -26,8 +26,8 @@ awk -v etime="$etime" '
 		ram += $3
 	}	
 	END {
-		jcore = core / 1000000
-		jram = ram / 1000000
+		jcore = core
+		jram = ram
 		jtotal = jcore + jram
 		if (NR == 2) {
 			print "?", jtotal, jcore, jram, "?"

@@ -20,6 +20,7 @@ for file in "$folder"/*; do
   if [ -x "$file" ] && [ -f "$file" ]; then
     filename=$(basename "$file")
     echo "Executing $filename $iterations times:"
+    echo 'time energy_total energy_core energy_ram power' > "results/$filename$timestamp.log"
     for ((i = 1; i <= iterations; i++)); do
       $cmd "$file" >> "results/$filename$timestamp.log"
     done
