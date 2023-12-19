@@ -14,6 +14,7 @@ iterations="$2"
 timestamp=$(date +"%Y%m%d_%H%M%S")
 cmd='./audit.sh'
 
+mkdir -p results
 
 for file in "$folder"/*; do
   if [ -x "$file" ] && [ -f "$file" ]; then

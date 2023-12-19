@@ -1,4 +1,5 @@
 #!/bin/sh
+time=$(which time)
 
 die() { printf '%s\n' "$*" >&2; exit 1; }
 
@@ -14,11 +15,11 @@ log=mojitos-result.log
 mojitos -f 10 -r -o $log &
 pid=$!
 
-"$@"
-
+# Execution of the commmand with 'time'
+etime=$( { $time -f "%e" "$@"; } 2>&1)
 kill $pid
 
-awk '
+awk -v etime="$etime" '
 	NR==2 {prev_timestamp = $1}  
 	NR>1 {
 		core += $2
@@ -32,7 +33,7 @@ awk '
 			print "?", jtotal, jcore, jram, "?"
 			exit 
 		}
-		time = $1 - prev_timestamp
+		time = etime
 		watt = jtotal / time
 		print time, jtotal, jcore, jram, watt
 	}
