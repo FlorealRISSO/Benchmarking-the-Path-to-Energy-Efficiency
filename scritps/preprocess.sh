@@ -36,6 +36,10 @@ for file in "$folder"/*$timestamp.log; do
 		line = NR - 1
 		time = time / line
 		energy = energy / line
+		# convert the values into Joule
+		energy /= 1000000
+		min /= 1000000
+		max /= 1000000
 
 		print executable, time, energy, max, min
 	}

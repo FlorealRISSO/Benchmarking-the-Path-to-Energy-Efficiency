@@ -12,8 +12,8 @@ def plot(data, timestamp):
     ax1.bar(data['file'], data['avg-energy'], yerr=[data['avg-energy'] - data['min-energy'], data['max-energy'] - data['avg-energy']], capsize=5, label='Avg Energy', color='blue', alpha=0.7)
 
     # Set labels and title for the first y-axis
-    ax1.set_xlabel('File')
-    ax1.set_ylabel('Energy', color='blue')
+    ax1.set_xlabel('Algorithm')
+    ax1.set_ylabel('Energy (Joule)', color='blue')
     ax1.tick_params(axis='y', labelcolor='blue')
     ax1.legend(loc='upper left')
 
@@ -22,7 +22,7 @@ def plot(data, timestamp):
     ax2.plot(data['file'], data['time'], label='Time', color='green', marker='o')
 
     # Set labels and title for the second y-axis
-    ax2.set_ylabel('Time', color='green')
+    ax2.set_ylabel('Time (second)', color='green')
     ax2.tick_params(axis='y', labelcolor='green')
     ax2.legend(loc='upper right')
 
