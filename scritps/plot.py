@@ -26,8 +26,14 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def plot(data, timestamp):
-    data = pd.read_csv(data, delimiter=' ')
+def plot(timestamp):
+    filename = f'analyzes/data_{timestamp}.csv'
+    try:
+        data = pd.read_csv(filename, delimiter=' ')
+    except FileNotFoundError:
+        print(f'run: ./preprocess.sh {timestamp} before.')
+        sys.exit(1)
+
     fig, ax1 = plt.subplots(figsize=(10, 6))
 
     # Bar plots with error bars for energy
@@ -59,13 +65,12 @@ def plot(data, timestamp):
 
 if __name__ == "__main__":
     # Check if at least one command-line argument is provided
-    if len(sys.argv) < 2:
-        print(f"Usage: python {sys.argv[0]} <data.csv>")
+    if len(sys.argv) != 2:
+        print(f"Usage: python {sys.argv[0]} <timestamp>")
         sys.exit(1)
 
     # Get the first command-line argument
-    data = sys.argv[1]
-    timestamp = data[-19:][:-4]
-    plot(data, timestamp)
+    timestamp = sys.argv[1]
+    plot(timestamp)
 
 
