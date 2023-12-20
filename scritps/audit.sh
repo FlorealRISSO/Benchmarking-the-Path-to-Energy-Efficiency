@@ -16,7 +16,7 @@ mojitos -f 10 -r -o $log &
 pid=$!
 
 # Execution of the commmand with 'time'
-etime=$( { $time -f "%e" "$@"; } 2>&1)
+etime=$($time -f "%e" "$@" 2>&1)
 kill $pid
 
 awk -v etime="$etime" '
@@ -38,4 +38,3 @@ awk -v etime="$etime" '
 		print time, jtotal, jcore, jram, watt
 	}
 ' $log
-

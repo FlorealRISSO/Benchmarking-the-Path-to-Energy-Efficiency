@@ -6,25 +6,39 @@ folder='results'
 [ ! -d $folder ] && die "Error: $folder is not a directory."
 
 [ "$#" -ne 1 ] && die "Usage: $0 <timestamp>"
-timestamp=$1
+mkdir -p analyzes
 
-echo 'file time energy' > data.csv
+timestamp=$1
+output="analyzes/data_$timestamp.csv"
+
+echo 'file time avg-energy max-energy min-energy' > "$output"
 
 for file in "$folder"/*$timestamp.log; do
 	executable=$(basename "${file:0:-19}")
 	awk -v executable=$executable '
+	NR==2 {
+		max=$2
+		min=$2
+	}
+
 	NR>1 {
 		time += $1
 		energy+= $2
+		if(min > $2) {
+			min = $2
+		}
+		if (max < $2) {
+			max = $2
+		}
 	}
 
 	END {
-		num_rows = NR - 1
-		time = time / num_rows
-		energy = energy / num_rows
+		line = NR - 1
+		time = time / line
+		energy = energy / line
 
-		print executable, time, energy
+		print executable, time, energy, max, min
 	}
-' $file >> data.csv
+' $file >> "$output"
 done
 

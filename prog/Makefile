@@ -7,8 +7,8 @@ all:
 	$(CC) $(CFLAGS) juliaM256f.c -o build/juliaM256f
 	$(CC) $(CFLAGS) -fopenmp juliaM256f.c -o build/juliaM256f
 	$(CC) $(CFLAGS) -fopenmp juliaM256fomp.c -o build/juliaM256fomp
-	$(CC) $(CFLAGS) juliaM512f.c -o build/juliaM512f -mavx512f
-	$(CC) $(CFLAGS) -fopenmp juliaM512fomp.c -o build/juliaM512fomp -mavx512f
+	# $(CC) $(CFLAGS) juliaM512f.c -o build/juliaM512f -mavx512f
+	# $(CC) $(CFLAGS) -fopenmp juliaM512fomp.c -o build/juliaM512fomp -mavx512f
 	$(CC) $(CFLAGS) juliaRow.c -o build/juliaRow
 	$(CC) $(CFLAGS) juliaMap.c -o build/juliaMap
 
